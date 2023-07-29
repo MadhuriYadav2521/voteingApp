@@ -12,9 +12,9 @@ export const renderAddCandidate = async (req,res) =>{
 export const addCandidate = async (req,res) =>{
     try {
         const { candidateName } = req.body;
-        if (!candidateName) { return res.status(400).json({ message: "Candidate name is mandatory!" }); }
+        if (!candidateName) { return res.send("Candidate name is mandatory!"); }
         const isCandidateAvailable = await Candidates.findOne({ candidateName }).exec();
-        if (isCandidateAvailable) return res.status(403).json({ message: "Candidate already exist!" });
+        if (isCandidateAvailable) return res.send("Candidate already exist!");
         const candidate = new Candidates({
             candidateName
         })

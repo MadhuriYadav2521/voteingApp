@@ -15,33 +15,30 @@ export const renderRegister = async (req,res) =>{
 export const register = async (req,res) =>{
     try {
         const { userName, email, password, phone } = req.body;
-        if (!userName) { return res.status(400).json({ message: "User name is mandatory!" }); }
-        if (!email) { return res.status(400).json({ message: "User email is mandatory!" }); }
-        if (!password) { return res.status(400).json({ message: "User password is mandatory!" }); }
-        if (!phone) { return res.status(400).json({ message: "Phone number is mandatory!" }); }
+        if (!userName) { return res.send("User name is mandatory!"); }
+        if (!email) { return res.send("User email is mandatory!"); }
+        if (!password) { return res.send("User password is mandatory!"); }
+        if (!phone) { return res.send("Phone number is mandatory!"); }
         const isUserAvailable = await Users.findOne({ email }).exec();
-        if (isUserAvailable) return res.status(403).json({ message: "User already exist!" });
+        if (isUserAvailable) return res.send("User already exist!");
         const hashedPassword = bcrypt.hashSync(password, 10)
         const user = new Users({
             userName, email, password: hashedPassword, phone
         })
         console.log(user);
         await user.save();
-        return res.send("Registration Successful");
+        return res.redirect('/user/login');
     } catch (err) {
         return res.send(err)
     }
 }
-const generateToken = async () =>{
-    const token = uuidv4()
-    return token
-}
+
 
 export const login = async (req,res) => {
     try{
         const{email, password} =req.body
-        if (!email) { return res.status(400).json({ message: "User email is mandatory!" }); }
-        if (!password) { return res.status(400).json({ message: "User password is mandatory!" }); }
+        if (!email) { return res.send("User email is mandatory!"); }
+        if (!password) { return res.send("User password is mandatory!"); }
         const user = await Users.findOne({email}).exec();
         if(!user) return res.send("User does not exist!")
         const isPasswordCorrect = compareSync(password,user.password)
@@ -50,11 +47,13 @@ export const login = async (req,res) => {
                 const token = uuidv4()
                 await Users.findOneAndUpdate({email}, { accesssToken : token})
             }
-            return res.send("Logged in!")
+            // return res.send("Logged in!")
+            return res.redirect('/user/votingPage');
             
         }else{
-            return res.send("Wrong password.")
+             res.send("Wrong password.")
         }
+        
     }catch(err){
         return res.send(err)
     }
@@ -72,7 +71,7 @@ export const renderGetToken = async (req,res) =>{
 export const getToken = async (req,res) =>{
     try {
         const { email, password } = req.body;
-        if (!email) return res.json({ message: "Email is required!" })
+        if (!email) return ressend("Email is required!")
         if (!password) return res.send("Password is required!")
         const user = await Users.findOne({ email }).exec();
         if (!user) return res.send("User not found!" )
@@ -80,6 +79,7 @@ export const getToken = async (req,res) =>{
         if (isPasswordCorrect) {
             if (user.accesssToken) {
                 res.render('getToken', { token: user.accesssToken })
+
             } else {
                 return res.send("Login first to generate token!" )
             }
@@ -106,19 +106,41 @@ export const renderVotingPage = async (req,res) =>{
 
 export const votingPage = async (req,res) =>{
     try{
-        const{candidateName, token} =req.body
-        const user = await Users.findOne({accesssToken: token}).exec();
-        // console.log(user._id);
-        const candidate = await Candidates.find({}).exec();
-
-         await Candidates.findOneAndUpdate({candidateName}, {$push: {vote : user._id}}).exec();
-       
-
+        const { candidateName, token } = req.body;
+        const user = await Users.findOne({ accesssToken: token }).exec();
+    
+        if (!user) return res.status(404).send("User not found.");
+    
+        const candidate = await Candidates.findOne({ candidateName }).exec();
+    
+        if (!candidate) return res.status(404).send("Candidate not found.");
+    
+        if (candidate.vote.includes(user._id.toString()))
+          return res.send("You already voted!");
+    
+        Candidates.votes += 1;
+        Candidates.vote.push(user._id.toString());
         await candidate.save();
-        return res.send("Voting successful!")
+    
+        return res.send("Voting successful!");
 
     }catch(err){
         return res.send(err)
     }
 }
+
+// export const adminLogin = async (req,res) => {
+//     try{
+//         const{userName, password} =req.body
+//         if (!userName) { return res.send("User name is mandatory!"); }
+//         if (!password) { return res.send("User password is mandatory!"); }
+//         if(userName == "admin" && password == "admin")
+//             return res.redirect('/admin/candidateMaster');
+//         else{
+//             return res.send("wrong credentials!")
+//         }
+//     }catch(err){
+//         return res.send(err)
+//     }
+// }
 
