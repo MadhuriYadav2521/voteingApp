@@ -13,31 +13,30 @@
 
   <div class="container mt-3">
     <h2>Voting Page</h2><br><br>
-    <a href="./getToken" class="btn btn-primary">Get Token</a><br><br>
-    <form action="/user/votingPage" method="post">
-      <div class="form-group">
+    <!-- <a href="./getToken" class="btn btn-primary">Get Token</a><br><br> -->
+    <form action="/user/votingPage/<%= user._id %>" method="post">
+      <!-- <div class="form-group">
         <label for="email">Token</label>
         <input name="token" type="text" class="form-control" required>
-      </div><br>
+      </div><br> -->
 
-      <% candidate.forEach((y)=>{ %>
-        <div class="form-check">
-          <input name="cName" value="<%= y.candidateName %>" type="radio" class="form-check-input" id="radio1"
-            y>
-          <label class="form-check-label" for="radio1">
-            <%= y.candidateName %>
-          </label>
-        </div>
-        <% }) %>
-         <input type="text" id="result" name="candidateName" disabled><br>
-         
+      <div class="mb-3">
+        <p> Select one candidate from the given options: </p>
 
-          <button type="submit"  class="btn btn-primary mt-3" onclick="displayRadioValue()">submit</button><br><br>
+        <select name="candidateName" id="select1" required>
+            <% candidate.forEach((y)=>{ %>
+                <option value="<%= y.candidateName %>">
+                    <%= y.candidateName %>
+                </option>
+                <% }) %>
+        </select>
+    </div><br>
+          <button type="submit"  class="btn btn-primary mt-3">submit</button><br><br>
     </form>
 
-    <a href="../" class="btn btn-warning">Back</a>
+    <a href="/" class="btn btn-warning">Back</a>
   </div>
-  <script>
+  <!-- <script>
     function displayRadioValue() {
       var ele = document.getElementsByName('cName');
 
@@ -46,7 +45,7 @@
           document.getElementById("result").innerHTML= ele[i].value;
       }
     }
-  </script>
+  </script> -->
 </body>
 
 </html>

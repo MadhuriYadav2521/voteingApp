@@ -43,12 +43,9 @@ export const login = async (req,res) => {
         if(!user) return res.send("User does not exist!")
         const isPasswordCorrect = compareSync(password,user.password)
         if(isPasswordCorrect){
-            if(!user.accesssToken){
-                const token = uuidv4()
-                await Users.findOneAndUpdate({email}, { accesssToken : token})
-            }
+           
             // return res.send("Logged in!")
-            return res.redirect('/user/votingPage');
+            return res.redirect('/user/userMaster');
             
         }else{
              res.send("Wrong password.")
@@ -56,6 +53,26 @@ export const login = async (req,res) => {
         
     }catch(err){
         return res.send(err)
+    }
+}
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 10;
+
+        const totalUsers = await Users.countDocuments({});
+        const totalPages = Math.ceil(totalUsers / perPage);
+        const startIndex = (page - 1) * perPage;
+
+        const user = await Users.find({})
+            .skip(startIndex)
+            .limit(perPage)
+            .exec();
+
+        res.render('userMaster', { user, currentPage: page, totalPages });
+    } catch (err) {
+        res.send(err);
     }
 }
 
@@ -93,11 +110,49 @@ export const getToken = async (req,res) =>{
 }
 
 
+// export const renderVotingPage = async (req,res) =>{
+//     try{
+//         const candidate = await Candidates.find({}).exec();
+//         if(!candidate) return res.send("Candidates not found!")
+//         res.render('votingPage', {candidate})
+
+//     }catch(err){
+//         return res.send(err)
+//     }
+// }
+
+// export const votingPage = async (req,res) =>{
+//     try{
+//         const { candidateName, token } = req.body;
+//         const user = await Users.findOne({ accesssToken: token }).exec();
+    
+//         if (!user) return res.status(404).send("User not found.");
+    
+//         const candidate = await Candidates.findOne({ candidateName }).exec();
+    
+//         if (!candidate) return res.status(404).send("Candidate not found.");
+    
+//         if (candidate.vote.includes(user._id.toString()))
+//           return res.send("You already voted!");
+    
+//         Candidates.votes += 1;
+//         Candidates.vote.push(user._id.toString());
+//         await candidate.save();
+    
+//         return res.send("Voting successful!");
+
+//     }catch(err){
+//         return res.send(err)
+//     }
+// }
+
 export const renderVotingPage = async (req,res) =>{
     try{
+        const id = req.params.id
+        const user = await Users.findOne({_id: id}).exec();
         const candidate = await Candidates.find({}).exec();
         if(!candidate) return res.send("Candidates not found!")
-        res.render('votingPage', {candidate})
+        res.render('votingPage', {candidate, user})
 
     }catch(err){
         return res.send(err)
@@ -106,41 +161,41 @@ export const renderVotingPage = async (req,res) =>{
 
 export const votingPage = async (req,res) =>{
     try{
-        const { candidateName, token } = req.body;
-        const user = await Users.findOne({ accesssToken: token }).exec();
-    
-        if (!user) return res.status(404).send("User not found.");
-    
-        const candidate = await Candidates.findOne({ candidateName }).exec();
-    
-        if (!candidate) return res.status(404).send("Candidate not found.");
-    
-        if (candidate.vote.includes(user._id.toString()))
-          return res.send("You already voted!");
-    
-        Candidates.votes += 1;
-        Candidates.vote.push(user._id.toString());
-        await candidate.save();
-    
-        return res.send("Voting successful!");
-
+       const id = req.params.id
+       const{candidateName} = req.body
+       const user = await Users.findOne({_id: id}).exec();
+       const candidate = await Candidates.find({}).exec();
+       const votedCandidate = candidate.find(candidate => candidate.vote.includes(id));
+       if (votedCandidate) {
+           return res.send("You have already voted for a candidate!");
+       }
+       const voting = await Candidates.findOneAndUpdate({ candidateName }, { $push: { vote: id } }).exec();
+       await voting.save();
+       return res.send("Voting successful!");
     }catch(err){
         return res.send(err)
     }
 }
 
-// export const adminLogin = async (req,res) => {
-//     try{
-//         const{userName, password} =req.body
-//         if (!userName) { return res.send("User name is mandatory!"); }
-//         if (!password) { return res.send("User password is mandatory!"); }
-//         if(userName == "admin" && password == "admin")
-//             return res.redirect('/admin/candidateMaster');
-//         else{
-//             return res.send("wrong credentials!")
-//         }
-//     }catch(err){
-//         return res.send(err)
-//     }
-// }
+export const renderAdminLogin = async (req,res) => {
+    try{
+      return res.render('adminLogin')
+    }catch(err){
+        return res.send(err)
+    }
+}
 
+export const adminLogin = async (req,res) => {
+    try{
+        const{userName, password} =req.body
+        if (!userName) { return res.send("User name is mandatory!"); }
+        if (!password) { return res.send("User password is mandatory!"); }
+        if(userName == "admin" && password == "admin")
+            return res.redirect('/admin/candidateMaster');
+        else{
+            return res.send("wrong credentials!")
+        }
+    }catch(err){
+        return res.send(err)
+    }
+}

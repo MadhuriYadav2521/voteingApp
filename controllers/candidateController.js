@@ -2,6 +2,7 @@ import Candidates from "../modals/candidateModal.js"
 
 export const renderAddCandidate = async (req,res) =>{
     try{
+      
         res.render('candidates')
 
     }catch(err){

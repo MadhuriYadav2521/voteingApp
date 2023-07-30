@@ -1,5 +1,5 @@
 import express from "express"
-import { getToken, login, register, renderGetToken, renderRegister, renderVotingPage, votingPage } from "../controllers/userController.js";
+import { adminLogin, getAllUsers, getToken, login, register, renderAdminLogin, renderGetToken, renderRegister, renderVotingPage, votingPage } from "../controllers/userController.js";
 import { addCandidate, renderAddCandidate } from "../controllers/candidateController.js";
 import { checksToAddCandidate } from "../middlewares/authMiddleware.js";
 import Candidates from "../modals/candidateModal.js"
@@ -18,6 +18,7 @@ userRoute.get('/', async (req, res) => {
 })
 userRoute.get('/user/register',renderRegister)
 userRoute.post('/user/register',register)
+userRoute.get('/user/userMaster',getAllUsers)
 userRoute.get('/user/login', async (req, res) => {
     try {
      
@@ -42,19 +43,19 @@ userRoute.get('/admin/candidateMaster', async (req,res)=> {
 })
 userRoute.get('/user/getToken',renderGetToken)
 userRoute.post('/user/getToken',getToken)
-userRoute.get('/user/votingPage',renderVotingPage)
-userRoute.post('/user/votingPage',votingPage)
-userRoute.get('/user/adminlogin', async (req, res) => {
+userRoute.get('/user/votingPage/:id',renderVotingPage)
+userRoute.post('/user/votingPage/:id',votingPage)
+userRoute.get('/admin/login', async (req, res) => {
     try {
      
-        res.render('login')
+        res.render('adminLogin')
 
     } catch (err) {
         return res.send(err);
     }
 
 })
-
+userRoute.post('/admin/login',adminLogin)
 
 
 

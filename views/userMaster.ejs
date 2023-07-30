@@ -17,9 +17,11 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>User ID</th>
                     <th>User Name</th>
                     <th>Email</th>
                     <th>Phone</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,12 +39,15 @@
                         <td>
                             <%= y.phone %>
                         </td>
-
+                        <td>
+                            <a class="nav-link btn btn-success" href="/user/votingPage/<%= y.id %>">Vote</a>
+                        </td>
                     </tr>
                     <% }) %>
 
             </tbody>
         </table>
+        <a href="../" class="btn btn-warning">Back</a>
     </div>
 
 </body>
