@@ -14,28 +14,36 @@
   <div class="container mt-3">
     <h2>Voting Page</h2><br><br>
     <!-- <a href="./getToken" class="btn btn-primary">Get Token</a><br><br> -->
-    <form action="/user/votingPage/<%= user._id %>" method="post">
-      <!-- <div class="form-group">
-        <label for="email">Token</label>
-        <input name="token" type="text" class="form-control" required>
-      </div><br> -->
-
-      <div class="mb-3">
-        <p> Select one candidate from the given options: </p>
-
-        <select name="candidateName" id="select1" required>
-            <% candidate.forEach((y)=>{ %>
-                <option  %>">
-                    <%= y.candidateName %>
-                </option>
-                <% }) %>
-        </select>
-    </div><br>
-          <button type="submit"  class="btn btn-primary mt-3">submit</button><br><br>
-    </form>
+ 
 
     <a href="/" class="btn btn-warning">Back</a>
   </div>
+<% if(votedCandidate) { %>
+      <h4>You have already voted for <%= votedCandidate.candidateName %></h4>
+<% }else{ %>
+  <form action="/user/votingPage/<%= user._id %>" method="post">
+    <!-- <div class="form-group">
+      <label for="email">Token</label>
+      <input name="token" type="text" class="form-control" required>
+    </div><br> -->
+
+    <div class="mb-3">
+      <p> Select one candidate from the given options: </p>
+
+      <select name="candidateName" id="select1" required>
+          <% candidate.forEach((y)=>{ %>
+              <option  %>">
+                  <%= y.candidateName %>
+              </option>
+              <% }) %>
+      </select>
+  </div><br>
+        <button type="submit"  class="btn btn-primary mt-3">submit</button><br><br>
+  </form>
+
+<% } %>
+
+
   <!-- <script>
     function displayRadioValue() {
       var ele = document.getElementsByName('cName');

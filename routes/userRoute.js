@@ -3,7 +3,7 @@ import { adminLogin, getAllUsers, getToken, login, register, renderAdminLogin, r
 import { addCandidate, renderAddCandidate } from "../controllers/candidateController.js";
 import { checksToAddCandidate } from "../middlewares/authMiddleware.js";
 import Candidates from "../modals/candidateModal.js"
-
+import Users from "../modals/userModal.js"
 const userRoute = express.Router()
 
 userRoute.get('/', async (req, res) => {
@@ -21,8 +21,10 @@ userRoute.post('/user/register',register)
 userRoute.get('/user/userMaster',getAllUsers)
 userRoute.get('/user/login', async (req, res) => {
     try {
-     
-        res.render('login')
+        // const email = req.body.email
+        const user = await Users.findOne({}).limit(1).sort({$natural:-1}).exec();
+    
+        res.render('login',{user})
 
     } catch (err) {
         return res.send(err);

@@ -19,6 +19,7 @@ export const register = async (req,res) =>{
         if (!email) { return res.send("User email is mandatory!"); }
         if (!password) { return res.send("User password is mandatory!"); }
         if (!phone) { return res.send("Phone number is mandatory!"); }
+        // if (!role) { return res.send("role is mandatory!"); }
         const isUserAvailable = await Users.findOne({ email }).exec();
         if (isUserAvailable) return res.send("User already exist!");
         const hashedPassword = bcrypt.hashSync(password, 10)
@@ -35,6 +36,7 @@ export const register = async (req,res) =>{
 }
 
 
+
 export const login = async (req,res) => {
     try{
         const{email, password} =req.body
@@ -44,10 +46,12 @@ export const login = async (req,res) => {
         if(!user) return res.send("User does not exist!")
         const isPasswordCorrect = compareSync(password,user.password)
         if(isPasswordCorrect){
-           
-            // return res.send("Logged in!")
-            return res.redirect('/user/userMaster');
-            
+            // return res.redirect('/user/userMaster');
+            if(user.role == "admin"){
+                 return res.redirect('/admin/candidateMaster');
+            }else{
+                 return res.render('user/votingPage/:id');
+            }
         }else{
              res.send("Wrong password.")
         }
@@ -153,7 +157,11 @@ export const renderVotingPage = async (req,res) =>{
         const user = await Users.findOne({_id: id}).exec();
         const candidate = await Candidates.find({}).exec();
         if(!candidate) return res.send("Candidates not found!")
-        res.render('votingPage', {candidate, user})
+        const votedCandidate = candidate.find(candidate => candidate.vote.includes(id));
+    //     if (votedCandidate) {
+    //      return res.send(`You have already voted for a candidate! ${candidateName}`);
+    //  }
+        res.render('votingPage', {candidate, user,votedCandidate})
 
     }catch(err){
         return res.send(err)
@@ -163,16 +171,19 @@ export const renderVotingPage = async (req,res) =>{
 export const votingPage = async (req,res) =>{
     try{
        const id = req.params.id
+
+    //    const votedCandidate = candidate.find(candidate => candidate.vote.includes(id));
+    //    if (votedCandidate) {
+    //     return res.send(`You have already voted for a candidate! ${candidateName}`);
+    // }
+
        const{candidateName} = req.body
-       const user = await Users.findOne({_id: id}).exec();
+       const user = await Users.findById({_id: id}).exec();
        const candidate = await Candidates.find({}).exec();
-       const votedCandidate = candidate.find(candidate => candidate.vote.includes(id));
-       if (votedCandidate) {
-           return res.send("You have already voted for a candidate!");
-       }
+       console.log(id);
        const voting = await Candidates.findOneAndUpdate({ candidateName }, { $push: { vote: id } }).exec();
        await voting.save();
-       return res.send("Voting successful!");
+       return res.send(`Voting successful for ${candidateName}`);
     }catch(err){
         return res.send(err)
     }

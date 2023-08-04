@@ -18,8 +18,9 @@ const userSchema = new Schema({
         type: Number,
         require: [true, "Phone number is required!"]
     },
-    accesssToken : {
-        type : String
+    role : {
+        type : String,
+        default: "voter"
     }
 })
 
