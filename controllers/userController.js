@@ -26,6 +26,7 @@ export const register = async (req,res) =>{
             userName, email, password: hashedPassword, phone
         })
         console.log(user);
+        
         await user.save();
         return res.redirect('/user/login');
     } catch (err) {
