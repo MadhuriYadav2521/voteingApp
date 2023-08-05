@@ -1,7 +1,10 @@
 var x =5
-y = 3
+var y = 3
 
-x= x-y =2 
+x= x-y  
+y = y+ x 
+x = y - x
 
-y = y+ x = 5
-x = y-x = 3
+console.log("x=",x);
+console.log("y=", y);
+
